@@ -3,14 +3,7 @@ from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 import numpy as np
 
-transform = transforms.Compose(
-    [
-        transforms.Resize((224, 224)),  # Resize images to match model input
-        transforms.ToTensor(),  # Convert images to tensor
-    ]
-)
-
-dataset = datasets.ImageFolder(root="./dataset/raw-img", transform=transform)
+dataset = datasets.ImageFolder(root="./dataset/raw-img")
 dataloader = DataLoader(dataset, batch_size=64, shuffle=False, num_workers=1)
 
 
