@@ -1,6 +1,8 @@
 import torch.nn as nn
 import torch.nn.functional as F
 
+from src.constants.constants import CLASS_NAMES
+
 
 class Block(nn.Module):
     expansion = 1
