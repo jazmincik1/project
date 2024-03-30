@@ -2,8 +2,6 @@ from torch.utils.data import Dataset, DataLoader
 import os
 from PIL import Image
 
-from constants import CLASS_NAMES
-
 
 class AnimalDataset(Dataset):
     def __init__(self, root_dir, transform=None):
