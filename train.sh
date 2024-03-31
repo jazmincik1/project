@@ -14,9 +14,9 @@ if [ "$MODEL_NAME" == "resnet18" ]; then
         --load-checkpoints-path /home \
         --save-checkpoints 1 \
         --save-checkpoints-epoch 10
-elif [ "$MODEL_NAME" == "alexnet" ];
+elif [ "$MODEL_NAME" == "alexnet" ]; then
     echo "not implemented yet"
-elif [ "$MODEL_NAME" == "lenet" ];
+elif [ "$MODEL_NAME" == "lenet" ]; then
     echo "not implemented yet"
 else
     echo "Invalid model name"
