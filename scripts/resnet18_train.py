@@ -15,8 +15,8 @@ from src.models.resnet18 import ResNet18
 from src.dataset.dataset import AnimalDataset
 from src.utils.transform import get_transform
 from src.utils.log import log
-from utils.plot_loss import plot_loss
-from utils.plot_confusion_matrix import plot_confusion_matrix
+from src.utils.plot_loss import plot_loss
+from src.utils.plot_confusion_matrix import plot_confusion_matrix
 from src.config.args import parser
 
 
