@@ -45,32 +45,37 @@ def train(model, device, train_loader, optimizer, epoch, loss_fn, losses, args):
             plot_loss(losses, f"loss_epoch_{epoch}_idx_{batch_idx}", args)
 
 
-def test(model, device, test_loader, epoch, loss_fn):
+def test(model, device, test_loader, epoch, loss_fn, args):
     model.eval()
     test_loss = 0
     correct = 0
 
-    correct = []
-    pred = []
+    all_preds = []
+    all_labels = []
 
     with torch.no_grad():
         for data, target in test_loader:
             data, target = data.to(device), target.to(device)
             output = model(data)
-            test_loss += loss_fn(output, target).item()  # Sum up batch loss
-            pred = output.argmax(dim=1, keepdim=True)
-            correct += pred.eq(target.view_as(pred)).sum().item()  # total number of correct predictions
 
-            pred.append(pred)
-            correct.append(target)
+            test_loss += loss_fn(output, target).item()
+            pred = output.argmax(dim=1, keepdim=False)
+            correct += (pred == target).sum().item()
+
+            all_preds.append(pred)
+            all_labels.append(target)
 
     test_loss /= len(test_loader.dataset)
-
     print(
         f"\nTest set: Average loss: {test_loss:.4f}, Accuracy: {correct}/{len(test_loader.dataset)} ({100. * correct / len(test_loader.dataset):.0f}%)\n"
     )
 
-    plot_confusion_matrix(correct, pred, f"confusion_matrix_epoch_{epoch}", args)
+    # Convert lists of batches into a single flat list
+    all_preds = torch.cat(all_preds).cpu()
+    all_labels = torch.cat(all_labels).cpu()
+
+    # Call the plotting function
+    plot_confusion_matrix(all_labels.numpy(), all_preds.numpy(), f"confusion_matrix_epoch_{epoch}", args)
 
 
 def main(args):
@@ -94,7 +99,7 @@ def main(args):
 
     for epoch in range(1, args.num_epochs + 1):
         train(model, device, train_loader, optimizer, epoch, loss_fn, losses, args)
-        test(model, device, test_loader, epoch, loss_fn)
+        test(model, device, test_loader, epoch, loss_fn, args)
 
         if args.save_checkpoints and epoch % args.save_checkpoints_epoch == 0:
             torch.save(model.state_dict(), f"checkpoints/{args.run_name}/epoch_{epoch}.pth")

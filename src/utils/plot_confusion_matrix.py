@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix
 import seaborn as sns
 
+from src.constants.constants import CLASS_NAMES
+
 
 def plot_confusion_matrix(y_true, y_pred, file_name, args):
 
@@ -10,7 +12,7 @@ def plot_confusion_matrix(y_true, y_pred, file_name, args):
 
     plt.figure(figsize=(10, 7))
 
-    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=True, yticklabels=True)
+    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=CLASS_NAMES, yticklabels=CLASS_NAMES)
 
     plt.title("Confusion Matrix")
 
