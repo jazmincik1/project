@@ -18,9 +18,10 @@ from src.utils.log import log
 from src.utils.plot_loss import plot_loss
 from src.utils.plot_confusion_matrix import plot_confusion_matrix
 from src.config.args import parser
+from torch.cuda.amp import autocast, GradScaler
 
 
-def train(model, device, train_loader, optimizer, epoch, loss_fn, losses, args):
+def train(model, device, train_loader, optimizer, epoch, loss_fn, scaler, losses, args):
     model.train()
     total_loss = 0
 
@@ -28,15 +29,19 @@ def train(model, device, train_loader, optimizer, epoch, loss_fn, losses, args):
 
     for batch_idx, (data, target) in progress_bar:
         data, target = data.to(device), target.to(device)
+
         optimizer.zero_grad()
-        output = model(data)
-        loss = loss_fn(output, target)
-        loss.backward()
-        optimizer.step()
+
+        with autocast():
+            output = model(data)
+            loss = loss_fn(output, target)
+
+        scaler.scale(loss).backward()
+        scaler.step(optimizer)
+        scaler.update()
 
         total_loss += loss.item()
 
-        # Update progress bar
         progress_bar.set_postfix(loss=total_loss / (batch_idx + 1))
 
         losses.append(loss.item())
@@ -94,11 +99,12 @@ def main(args):
     model = ResNet18().to(device)
     loss_fn = nn.CrossEntropyLoss()  # this was written in the original paper
     optimizer = optim.Adam(model.parameters(), lr=args.learning_rate)
+    scaler = GradScaler()
 
     losses = deque(maxlen=1000)
 
     for epoch in range(1, args.num_epochs + 1):
-        train(model, device, train_loader, optimizer, epoch, loss_fn, losses, args)
+        train(model, device, train_loader, optimizer, epoch, loss_fn, scaler, losses, args)
         test(model, device, test_loader, epoch, loss_fn, args)
 
         if args.save_checkpoints and epoch % args.save_checkpoints_epoch == 0:
