@@ -99,11 +99,14 @@ def main(args):
     device = args.device
 
     # Load the pre-trained ResNet model
-    model = models.resnet18(weights=ResNet18_Weights.IMAGENET1K_V1)
     """
     IMAGENET1K_V1: The weights are pre-trained on the ImageNet1K dataset.
     DEFAULT: DEFAULT = IMAGENET1K_V1 (I guess they are the same, not worth changing...)
     """
+
+    log("Loading pre-trained ResNet18 model")
+    model = models.resnet18(weights=ResNet18_Weights.IMAGENET1K_V1)
+    log("Loaded pre-trained ResNet18 model")
 
     # Modify the last fully connected layer to match the number of classes
     last_layer_in_features = model.fc.in_features
