@@ -58,8 +58,10 @@ def test(model, device, test_loader, epoch, loss_fn, args):
     all_preds = []
     all_labels = []
 
+    progress_bar = tqdm(enumerate(test_loader), total=len(test_loader), desc=f"Epoch {epoch}, test")
+
     with torch.no_grad():
-        for data, target in test_loader:
+        for _, (data, target) in progress_bar:
             data, target = data.to(device), target.to(device)
             output = model(data)
 
