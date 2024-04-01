@@ -9,6 +9,7 @@ import torch.nn as nn
 import torch.optim as optim
 from tqdm import tqdm
 from torchvision import models
+from torchvision.models import ResNet18_Weights
 from torch.cuda.amp import autocast, GradScaler
 from collections import deque
 
@@ -98,7 +99,11 @@ def main(args):
     device = args.device
 
     # Load the pre-trained ResNet model
-    model = models.resnet18(pretrained=True)
+    model = models.resnet18(weights=ResNet18_Weights.IMAGENET1K_V1)
+    """
+    IMAGENET1K_V1: The weights are pre-trained on the ImageNet1K dataset.
+    DEFAULT: DEFAULT = IMAGENET1K_V1 (I guess they are the same, not worth changing...)
+    """
 
     # Modify the last fully connected layer to match the number of classes
     last_layer_in_features = model.fc.in_features
