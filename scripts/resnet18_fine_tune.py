@@ -102,14 +102,16 @@ def main(args):
 
     # Modify the last fully connected layer to match the number of classes
     last_layer_in_features = model.fc.in_features
-    model.fc = nn.Linear(last_layer_in_features, len(ANIMAL_CLASSES))
+    model.fc = nn.Linear(last_layer_in_features, len(CLASS_NAMES))
     model = model.to(device)
 
     loss_fn = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=args.learning_rate)
     scaler = GradScaler()
-
     losses = deque(maxlen=1000)
+
+    # Test the model without any training.
+    test(model, device, test_loader, -1, loss_fn, args)
 
     for epoch in range(1, args.num_epochs + 1):
         train(model, device, train_loader, optimizer, epoch, loss_fn, scaler, losses, args)

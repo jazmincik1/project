@@ -100,8 +100,10 @@ def main(args):
     loss_fn = nn.CrossEntropyLoss()  # this was written in the original paper
     optimizer = optim.Adam(model.parameters(), lr=args.learning_rate)
     scaler = GradScaler()
-
     losses = deque(maxlen=1000)
+
+    # Test the model without any training.
+    test(model, device, test_loader, -1, loss_fn, args)
 
     for epoch in range(1, args.num_epochs + 1):
         train(model, device, train_loader, optimizer, epoch, loss_fn, scaler, losses, args)
