@@ -8,7 +8,8 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from tqdm import tqdm
-
+from torchvision import models
+from torch.cuda.amp import autocast, GradScaler
 from collections import deque
 
 from src.models.resnet18 import ResNet18
@@ -18,7 +19,7 @@ from src.utils.log import log
 from src.utils.plot_loss import plot_loss
 from src.utils.plot_confusion_matrix import plot_confusion_matrix
 from src.config.args import parser
-from torch.cuda.amp import autocast, GradScaler
+from src.constants.constants import ANIMAL_CLASSES
 
 
 def train(model, device, train_loader, optimizer, epoch, loss_fn, scaler, losses, args):
@@ -96,8 +97,15 @@ def main(args):
 
     device = args.device
 
-    model = ResNet18().to(device)
-    loss_fn = nn.CrossEntropyLoss()  # this was written in the original paper
+    # Load the pre-trained ResNet model
+    model = models.resnet18(pretrained=True)
+
+    # Modify the last fully connected layer to match the number of classes
+    last_layer_in_features = model.fc.in_features
+    model.fc = nn.Linear(last_layer_in_features, len(ANIMAL_CLASSES))
+    model = model.to(device)
+
+    loss_fn = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=args.learning_rate)
     scaler = GradScaler()
 
@@ -118,7 +126,7 @@ if __name__ == "__main__":
     # Parse the command-line arguments
     args = parser.parse_args()
 
-    args.run_name = "train__" + args.run_name
+    args.run_name = "fine_tune__" + args.run_name
 
     log("Using args:", args)
     os.makedirs(f"checkpoints/{args.run_name}", exist_ok=True)

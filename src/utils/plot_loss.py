@@ -7,7 +7,7 @@ def plot_loss(losses, file_name, args):
 
     plt.figure(figsize=(10, 5))
 
-    plt.plot(time_steps, losses, label="Generator Loss", color="red", marker="x")
+    plt.plot(time_steps, losses, label="Loss", color="red", marker="x")
 
     plt.title("Loss Over Time")
     plt.xlabel("Time Step")
