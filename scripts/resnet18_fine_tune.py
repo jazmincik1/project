@@ -22,6 +22,8 @@ from src.utils.plot_confusion_matrix import plot_confusion_matrix
 from src.config.args import parser
 from src.constants.constants import CLASS_NAMES
 
+torch.cuda.empty_cache()
+
 
 def train(model, device, train_loader, optimizer, epoch, loss_fn, scaler, losses, args):
     model.train()
@@ -115,13 +117,20 @@ def main(args):
     model.fc = nn.Linear(last_layer_in_features, len(CLASS_NAMES))
     model = model.to(device)
 
+    for param in model.parameters():
+        param.requires_grad = False
+
+    # Only train the last layer
+    for param in model.fc.parameters():
+        param.requires_grad = True
+
     loss_fn = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=args.learning_rate)
     scaler = GradScaler()
     losses = deque(maxlen=1000)
 
     # Test the model without any training.
-    test(model, device, test_loader, -1, loss_fn, args)
+    # test(model, device, test_loader, -1, loss_fn, args)
 
     for epoch in range(1, args.num_epochs + 1):
         train(model, device, train_loader, optimizer, epoch, loss_fn, scaler, losses, args)
