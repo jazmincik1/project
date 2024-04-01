@@ -22,7 +22,11 @@ class AnimalDataset(Dataset):
 
         for idx, class_name in enumerate(self.class_names):
             class_dir = os.path.join(root_dir, class_name)
-            class_dir_list = os.listdir(class_dir) if use_all_images else os.listdir(class_dir)[:min_image_count]
+            class_dir_list = (
+                os.listdir(class_dir)
+                if use_all_images
+                else os.listdir(class_dir)[: self.class_image_count[min_image_count]]
+            )
             for img_name in class_dir_list:
                 if os.path.isfile(os.path.join(class_dir, img_name)):
                     self.images.append(os.path.join(class_dir, img_name))
