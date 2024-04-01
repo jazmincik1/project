@@ -19,7 +19,7 @@ from src.utils.log import log
 from src.utils.plot_loss import plot_loss
 from src.utils.plot_confusion_matrix import plot_confusion_matrix
 from src.config.args import parser
-from src.constants.constants import ANIMAL_CLASSES
+from src.constants.constants import CLASS_NAMES
 
 
 def train(model, device, train_loader, optimizer, epoch, loss_fn, scaler, losses, args):
