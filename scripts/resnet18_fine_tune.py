@@ -137,6 +137,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     args.run_name = "fine_tune__" + args.run_name
+    args.device = torch.device(args.device)
+    log("Using device:", args.device)
 
     log("Using args:", args)
     os.makedirs(f"checkpoints/{args.run_name}", exist_ok=True)
