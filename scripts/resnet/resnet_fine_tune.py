@@ -110,20 +110,20 @@ def main(args):
     DEFAULT: DEFAULT = IMAGENET1K_V1 (I guess they are the same, not worth changing...)
     """
 
-    model_version = args.model_version
+    resnet_version = args.resnet_version
 
-    log(f"Loading pre-trained ResNet{model_version} model")
+    log(f"Loading pre-trained ResNet{resnet_version} model")
 
-    if model_version == "18":
+    if resnet_version == "18":
         model = models.resnet18(weights=ResNet18_Weights.IMAGENET1K_V1)
-    elif model_version == "34":
+    elif resnet_version == "34":
         model = models.resnet34(weights=ResNet34_Weights.IMAGENET1K_V1)
-    elif model_version == "50":
+    elif resnet_version == "50":
         model = models.resnet50(weights=ResNet50_Weights.IMAGENET1K_V1)
     else:
         raise ValueError("Invalid model version")
 
-    log(f"Loaded pre-trained ResNet{model_version} model")
+    log(f"Loaded pre-trained ResNet{resnet_version} model")
 
     # Modify the last fully connected layer to match the number of classes
     last_layer_in_features = model.fc.in_features
