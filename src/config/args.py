@@ -15,3 +15,6 @@ parser.add_argument("--load-checkpoints", type=int, default=config.LOAD_CHECKPOI
 parser.add_argument("--load-checkpoints-path", type=str, default=config.LOAD_CHECKPOINTS_PATH)
 parser.add_argument("--save-checkpoints", type=int, default=config.SAVE_CHECKPOINTS)
 parser.add_argument("--save-checkpoints-epoch", type=int, default=config.SAVE_CHECKPOINTS_EPOCH)
+
+# Resnet specific
+parser.add_argument("--resnet-version", type=str, default=config.RESNET_VERSION)

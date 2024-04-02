@@ -1,9 +1,16 @@
 #!/bin/bash
 
+if [ $# -lt 1 ]; then
+    echo "Usage: $0 MODEL_NAME [MODEL_VERSION]"
+    exit 1
+fi
+
 MODEL_NAME="$1"
 
+MODEL_VERSION="${2:-'18'}"
+
 if [ "$MODEL_NAME" == "resnet18_train" ]; then
-    python scripts/resnet18_train.py \
+    python scripts/resnet/resnet18_train.py \
         --run-name resnet_first \
         --dataset-dir /content/drive/MyDrive/colab_data/animals \
         --learning-rate 0.001 \
@@ -15,9 +22,10 @@ if [ "$MODEL_NAME" == "resnet18_train" ]; then
         --save-checkpoints 1 \
         --save-checkpoints-epoch 5
 
-elif [ "$MODEL_NAME" == "resnet18_fine_tune" ]; then
-    python scripts/resnet18_fine_tune.py \
-        --run-name resnet_first \
+elif [ "$MODEL_NAME" == "resnet_fine_tune" ]; then
+    python scripts/resnet/resnet_fine_tune.py \
+        --resnet-version "$MODEL_VERSION" \
+        --run-name "$MODEL_NAME-$MODEL_VERSION-run" \
         --dataset-dir /content/drive/MyDrive/colab_data/animals \
         --learning-rate 0.001 \
         --batch-size 16 \

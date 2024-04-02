@@ -10,6 +10,8 @@ import torch.optim as optim
 from tqdm import tqdm
 from torchvision import models
 from torchvision.models import ResNet18_Weights
+from torchvision.models import ResNet34_Weights
+from torchvision.models import ResNet50_Weights
 from torch.cuda.amp import autocast, GradScaler
 from collections import deque
 
@@ -108,9 +110,20 @@ def main(args):
     DEFAULT: DEFAULT = IMAGENET1K_V1 (I guess they are the same, not worth changing...)
     """
 
-    log("Loading pre-trained ResNet18 model")
-    model = models.resnet18(weights=ResNet18_Weights.IMAGENET1K_V1)
-    log("Loaded pre-trained ResNet18 model")
+    model_version = args.model_version
+
+    log(f"Loading pre-trained ResNet{model_version} model")
+
+    if model_version == "18":
+        model = models.resnet18(weights=ResNet18_Weights.IMAGENET1K_V1)
+    elif model_version == "34":
+        model = models.resnet34(weights=ResNet34_Weights.IMAGENET1K_V1)
+    elif model_version == "50":
+        model = models.resnet50(weights=ResNet50_Weights.IMAGENET1K_V1)
+    else:
+        raise ValueError("Invalid model version")
+
+    log(f"Loaded pre-trained ResNet{model_version} model")
 
     # Modify the last fully connected layer to match the number of classes
     last_layer_in_features = model.fc.in_features
