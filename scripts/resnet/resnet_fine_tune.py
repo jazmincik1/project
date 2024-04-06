@@ -21,6 +21,7 @@ from src.utils.transform import get_transform
 from src.utils.log import log
 from src.utils.plot_loss import plot_loss
 from src.utils.plot_confusion_matrix import plot_confusion_matrix
+from src.utils.save_misclassified import save_misclassified_images
 from src.config.args import parser
 from src.constants.constants import CLASS_NAMES
 
@@ -63,11 +64,12 @@ def test(model, device, test_loader, epoch, loss_fn, args):
 
     all_preds = []
     all_labels = []
+    misclassified_examples = []
 
     progress_bar = tqdm(enumerate(test_loader), total=len(test_loader), desc=f"Epoch {epoch}, test")
 
     with torch.no_grad():
-        for _, (data, target) in progress_bar:
+        for batch_idx, (data, target) in progress_bar:
             data, target = data.to(device), target.to(device)
             output = model(data)
 
@@ -78,17 +80,30 @@ def test(model, device, test_loader, epoch, loss_fn, args):
             all_preds.append(pred)
             all_labels.append(target)
 
+            # Identify misclassified examples
+            misclassified_indices = pred != target
+            misclassified_data = data[misclassified_indices]
+            misclassified_targets = target[misclassified_indices]
+            misclassified_preds = pred[misclassified_indices]
+
+            for i in range(misclassified_data.size(0)):
+                example = {
+                    "data": misclassified_data[i],
+                    "true_label": CLASS_NAMES[misclassified_targets[i].item().cpu()],
+                    "predicted_label": CLASS_NAMES[misclassified_preds[i].item().cpu()],
+                }
+                misclassified_examples.append(example)
+
     test_loss /= len(test_loader.dataset)
     print(
         f"\nTest set: Average loss: {test_loss:.4f}, Accuracy: {correct}/{len(test_loader.dataset)} ({100. * correct / len(test_loader.dataset):.0f}%)\n"
     )
 
-    # Convert lists of batches into a single flat list
     all_preds = torch.cat(all_preds).cpu()
     all_labels = torch.cat(all_labels).cpu()
 
-    # Call the plotting function
     plot_confusion_matrix(all_labels.numpy(), all_preds.numpy(), f"confusion_matrix_epoch_{epoch}", args)
+    save_misclassified_images(misclassified_examples, f"results/{args.run_name}/misclassified/{epoch}/")
 
 
 def main(args):
@@ -172,4 +187,5 @@ if __name__ == "__main__":
     os.makedirs(f"checkpoints/{args.run_name}", exist_ok=True)
     os.makedirs(f"results/{args.run_name}/loss/", exist_ok=True)
     os.makedirs(f"results/{args.run_name}/conf/", exist_ok=True)
+    os.makedirs(f"results/{args.run_name}/misclassified/", exist_ok=True)
     main(args)
