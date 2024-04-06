@@ -89,8 +89,8 @@ def test(model, device, test_loader, epoch, loss_fn, args):
             for i in range(misclassified_data.size(0)):
                 example = {
                     "data": misclassified_data[i],
-                    "true_label": CLASS_NAMES[misclassified_targets[i].item().cpu()],
-                    "predicted_label": CLASS_NAMES[misclassified_preds[i].item().cpu()],
+                    "true_label": CLASS_NAMES[misclassified_targets[i].item()],
+                    "predicted_label": CLASS_NAMES[misclassified_preds[i].item()],
                 }
                 misclassified_examples.append(example)
 
