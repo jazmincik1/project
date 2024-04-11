@@ -61,7 +61,7 @@ elif [ "$MODEL_NAME" == "vgg_fine_tune" ]; then
         --load-checkpoints-path /home \
         --save-checkpoints 1 \
         --save-checkpoints-epoch 10 \
-        --resnet-version 16
+        --vgg-version 16
 
 elif [ "$MODEL_NAME" == "alexnet" ]; then
     echo "not implemented yet"

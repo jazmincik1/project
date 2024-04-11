@@ -170,7 +170,7 @@ def main(args):
 
 
     for epoch in range(1, args.num_epochs + 1):
-        train(model, device, train_loader, optimizer, epoch, criterion, losses, args)
+        train(model, device, train_loader, optimizer, epoch, criterion, args)
         test(model, device, test_loader, epoch, criterion, args)
 
         if args.save_checkpoints and epoch % args.save_checkpoints_epoch == 0:
