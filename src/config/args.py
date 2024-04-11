@@ -18,3 +18,6 @@ parser.add_argument("--save-checkpoints-epoch", type=int, default=config.SAVE_CH
 
 # Resnet specific
 parser.add_argument("--resnet-version", type=str, default=config.RESNET_VERSION)
+
+#vgg
+parser.add_argument("--vgg-version", type=str, default=config.RESNET_VERSION)
