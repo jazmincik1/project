@@ -63,6 +63,19 @@ elif [ "$MODEL_NAME" == "vgg_fine_tune" ]; then
         --save-checkpoints-epoch 10 \
         --vgg-version 16
 
+elif [ "$MODEL_NAME" == "randomforest.py" ]; then
+    python scripts/forest/randomforest_train.py \
+        --run-name randomforest_train \
+        --dataset-dir /content/drive/MyDrive/colab_data/animals \
+        --learning-rate 0.001 \
+        --batch-size 16 \
+        --num-workers 2 \
+        --num-epochs 50 \
+        --load-checkpoints 0 \
+        --load-checkpoints-path /home \
+        --save-checkpoints 1 \
+        --save-checkpoints-epoch 10
+
 elif [ "$MODEL_NAME" == "alexnet" ]; then
     echo "not implemented yet"
 else
