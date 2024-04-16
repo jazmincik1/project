@@ -24,37 +24,34 @@ from src.constants.constants import CLASS_NAMES
 
 torch.cuda.empty_cache()
 
-def train(model, device, train_loader, optimizer, num_epochs,criterion,args):
-    model.train()  # Set the model to training mode
-    train_loss_history = []
-    train_accuracy_history = []
+def train(model, device, train_loader, optimizer, epoch, criterion, scaler, losses, args):
+    model.train()
+    total_loss = 0
 
-    for epoch in range(num_epochs):
-        running_loss = 0.0
-        correct = 0
-        total = 0
+    progress_bar = tqdm(enumerate(train_loader), total=len(train_loader), desc=f"Epoch {epoch}")
 
-        for inputs, labels in train_loader:
-            inputs, labels = inputs.to(device), labels.to(device)  # Move data to GPU
-            optimizer.zero_grad()  # Zero the parameter gradients
-            outputs = model(inputs)  # Forward pass
-            loss = criterion(outputs, labels)  # Calculate loss
-            loss.backward()  # Backward pass
-            optimizer.step()  # Optimize
+    for batch_idx, (data, target) in progress_bar:
+        data, target = data.to(device), target.to(device)
 
-            running_loss += loss.item()
-            _, predicted = torch.max(outputs.data, 1)
-            total += labels.size(0)
-            correct += (predicted == labels).sum().item()
+        optimizer.zero_grad()
 
-        epoch_loss = running_loss / len(train_loader)
-        epoch_accuracy = 100 * correct / total
-        train_loss_history.append(epoch_loss)
-        train_accuracy_history.append(epoch_accuracy)
+        with autocast():
+            output = model(data)
+            loss = criterion(output, target)
 
-        print(f'Epoch {epoch+1}/{num_epochs}, Loss: {epoch_loss:.4f}, Accuracy: {epoch_accuracy:.2f}%')
+        scaler.scale(loss).backward()
+        scaler.step(optimizer)
+        scaler.update()
 
-    return train_loss_history, train_accuracy_history
+        total_loss += loss.item()
+
+        progress_bar.set_postfix(loss=total_loss / (batch_idx + 1))
+
+        losses.append(loss.item())
+
+        if batch_idx % args.plot_loss_every_n_iteration == 0 and batch_idx != 0:
+            plot_loss(losses, f"loss_epoch_{epoch}_idx_{batch_idx}", args)
+
 
 def validate_model(model, val_loader, criterion):
     model.eval()  # Set the model to evaluation mode
@@ -166,11 +163,11 @@ def main(args):
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=args.learning_rate, momentum=0.9)
+    scaler = GradScaler()
     losses = deque(maxlen=1000)
 
-
     for epoch in range(1, args.num_epochs + 1):
-        train(model, device, train_loader, optimizer, epoch, criterion, args)
+        train(model, device, train_loader, optimizer, epoch, criterion, scaler, losses, args)
         test(model, device, test_loader, epoch, criterion, args)
 
         if args.save_checkpoints and epoch % args.save_checkpoints_epoch == 0:
