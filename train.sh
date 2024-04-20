@@ -63,7 +63,7 @@ elif [ "$MODEL_NAME" == "vgg_fine_tune" ]; then
         --save-checkpoints-epoch 10 \
         --vgg-version 16
 
-elif [ "$MODEL_NAME" == "randomforest.py" ]; then
+elif [ "$MODEL_NAME" == "randomforest_train" ]; then
     python scripts/forest/randomforest_train.py \
         --run-name randomforest_train \
         --dataset-dir /content/drive/MyDrive/colab_data/animals \

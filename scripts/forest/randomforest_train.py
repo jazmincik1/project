@@ -42,6 +42,7 @@ def test(model,X_test, y_test,n_est, args):
 
 def main(args):
 
+    log("Loading dataset")
     full_dataset = DatasetNP(root_dir=args.dataset_dir)
     images, labels = full_dataset.get_data()
 
@@ -55,6 +56,7 @@ def main(args):
     #Rather than using pixels as features, later, different
     # feature extraction methodfs will be used. Such as pooling some of th epixels, or using a feature extreaction network first
 
+    log("Start training")
     for n_est in [10,50,100,1000]:
         log(f"Random forest with {n_est} estimators")
         model = RandomForestModel(n_est)
