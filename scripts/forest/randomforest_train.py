@@ -37,7 +37,7 @@ def test(model,X_test, y_test,n_est, args):
     all_preds = predictions
     all_labels = y_test
 
-    plot_confusion_matrix(all_labels.numpy(), all_preds.numpy(), f"confusion_matrix_forest_n{n_est}", args)
+    plot_confusion_matrix(all_labels, all_preds, f"confusion_matrix_forest_n_{n_est}", args)
 
 
 def main(args):
