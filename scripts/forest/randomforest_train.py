@@ -43,7 +43,7 @@ def test(model,X_test, y_test,n_est, args):
 def main(args):
 
     log("Loading dataset")
-    full_dataset = DatasetNP(root_dir=args.dataset_dir)
+    full_dataset = DatasetNP(root_dir=args.dataset_dir,enable_max_images=True)
     images, labels = full_dataset.get_data()
 
     # Splitting the dataset into train and test sets
