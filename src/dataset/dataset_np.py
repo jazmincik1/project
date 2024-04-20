@@ -3,9 +3,11 @@ import numpy as np
 from PIL import Image
 
 class DatasetNP:
-    def __init__(self, root_dir, target_size=(224, 224)):
+    def __init__(self, root_dir, target_size=(224, 224), enable_max_images=False, max_images_per_class=50):
         self.root_dir = root_dir
         self.target_size = target_size
+        self.enable_max_images = enable_max_images
+        self.max_images_per_class = max_images_per_class
         self.images = []
         self.labels = []
         self.class_names = []
@@ -23,15 +25,18 @@ class DatasetNP:
             if '.DS_Store' in image_names:
                 image_names.remove('.DS_Store')
 
+            image_count = 0  # Initialize counter for images per class
             for image_name in image_names:
+                if self.enable_max_images and image_count >= self.max_images_per_class:
+                    break  # Stop loading if max count reached
                 image_path = os.path.join(class_path, image_name)
                 try:
                     image = Image.open(image_path).convert('RGB')
                     image = image.resize(self.target_size)
-                    # Flatten the image to a 1D array
                     flattened_image = np.array(image).flatten()
                     self.images.append(flattened_image)
                     self.labels.append(label)
+                    image_count += 1
                 except Exception as e:
                     print(f"Error loading image {image_path}: {e}")
 
