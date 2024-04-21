@@ -76,8 +76,32 @@ elif [ "$MODEL_NAME" == "randomforest_train" ]; then
         --save-checkpoints 1 \
         --save-checkpoints-epoch 10
 
-elif [ "$MODEL_NAME" == "alexnet" ]; then
-    echo "not implemented yet"
+elif [ "$MODEL_NAME" == "alexnet_train" ]; then
+    python scripts/alexnet/alexnet_train.py \
+        --run-name alexnet_train \
+        --dataset-dir /content/drive/MyDrive/colab_data/animals \
+        --learning-rate 0.001 \
+        --batch-size 16 \
+        --num-workers 2 \
+        --num-epochs 50 \
+        --load-checkpoints 0 \
+        --load-checkpoints-path /home \
+        --save-checkpoints 1 \
+        --save-checkpoints-epoch 5
+
+elif [ "$MODEL_NAME" == "alexnet_fine_tune" ]; then
+    python scripts/alexnet/alexnet_fine_tune.py \
+        --run-name alexnet_fine_tune \
+        --dataset-dir /content/drive/MyDrive/colab_data/animals \
+        --learning-rate 0.001 \
+        --batch-size 16 \
+        --num-workers 2 \
+        --num-epochs 50 \
+        --load-checkpoints 0 \
+        --load-checkpoints-path /home \
+        --save-checkpoints 1 \
+        --save-checkpoints-epoch 5
+
 else
     echo "Invalid model name"
     exit 1
