@@ -21,4 +21,4 @@ parser.add_argument("--resnet-version", type=str, default=config.RESNET_VERSION)
 
 #vgg
 parser.add_argument("--decay-lr", type=int, default=config.DECAY_LR)
-parser.add_argument("--vgg-version", type=str, default=config.RESNET_VERSION)
+parser.add_argument("--vgg-version", type=str, default=config.VGG_VERSION)
