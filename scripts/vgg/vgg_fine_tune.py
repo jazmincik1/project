@@ -171,6 +171,9 @@ def main(args):
     #add decay to learning rate
     if lr_decay:
         scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
+    else:
+        scheduler = None
+        
     scaler = GradScaler()
     losses = deque(maxlen=1000)
 
