@@ -18,3 +18,7 @@ PLOT_LOSS_EVERY_N_ITERATION = 50
 
 # Resnet specific
 RESNET_VERSION = "18"
+
+# VGG specific
+VGG_VERSION = '16'
+DECAY_LR = None

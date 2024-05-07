@@ -24,7 +24,7 @@ from src.constants.constants import CLASS_NAMES
 
 torch.cuda.empty_cache()
 
-def train(model, device, train_loader, optimizer, epoch, criterion, scaler, losses, args):
+def train(model, device, train_loader, optimizer, epoch, criterion, scaler, losses, scheduler, args):
     model.train()
     total_loss = 0
 
@@ -42,6 +42,9 @@ def train(model, device, train_loader, optimizer, epoch, criterion, scaler, loss
         scaler.scale(loss).backward()
         scaler.step(optimizer)
         scaler.update()
+
+        if args.decay_lr and scheduler is not None:
+            scheduler.step()
 
         total_loss += loss.item()
 
@@ -149,6 +152,7 @@ def main(args):
 
     device = args.device
     vgg_version = args.vgg_version
+    lr_decay = args.decay_lr
 
     log(f"Loading pre-trained VGG{vgg_version} model")
 
@@ -163,11 +167,15 @@ def main(args):
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=args.learning_rate, momentum=0.9)
+
+    #add decay to learning rate
+    if lr_decay:
+        scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
     scaler = GradScaler()
     losses = deque(maxlen=1000)
 
     for epoch in range(1, args.num_epochs + 1):
-        train(model, device, train_loader, optimizer, epoch, criterion, scaler, losses, args)
+        train(model, device, train_loader, optimizer, epoch, criterion, scaler, losses,scheduler, args)
         test(model, device, test_loader, epoch, criterion, args)
 
         if args.save_checkpoints and epoch % args.save_checkpoints_epoch == 0:
