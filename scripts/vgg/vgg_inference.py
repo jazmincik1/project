@@ -76,9 +76,6 @@ def main():
     test_size = len(full_dataset) - train_size
     train_dataset, test_dataset = random_split(full_dataset, [train_size, test_size])
 
-    train_loader = DataLoader(
-        train_dataset, batch_size=args.batch_size, num_workers=args.num_workers, shuffle=True, pin_memory=True
-    )
     test_loader = DataLoader(
         test_dataset, batch_size=args.batch_size, num_workers=args.num_workers, shuffle=False, pin_memory=True
     )
@@ -93,7 +90,6 @@ def main():
     
     
 if __name__ == "__main__":
-    # Parse the command-line arguments
     args = parser.parse_args()
 
     args.run_name = "fine_tune__" + args.run_name
