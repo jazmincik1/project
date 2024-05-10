@@ -27,7 +27,7 @@ def import_images_data(samples_directory):
 path_to_sample_images = 'raw-img1'
 
 param_grid = {
-    'C': [0.01],  # Penalty parameter C
+    'C': [0.01,0.1,1],  # Penalty parameter C
     'kernel': ['linear']  # Kernel type
 }
 
