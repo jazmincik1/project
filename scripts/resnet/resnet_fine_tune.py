@@ -20,6 +20,7 @@ from src.dataset.dataset import AnimalDataset
 from src.utils.transform import get_transform
 from src.utils.log import log
 from src.utils.plot_loss import plot_loss
+from src.utils.plot_accuracy import plot_accuracy
 from src.utils.plot_confusion_matrix import plot_confusion_matrix
 from src.utils.save_misclassified import save_misclassified_images
 from src.config.args import parser
@@ -28,7 +29,7 @@ from src.constants.constants import CLASS_NAMES
 torch.cuda.empty_cache()
 
 
-def train(model, device, train_loader, optimizer, epoch, loss_fn, scaler, losses, args):
+def train(model, device, train_loader, optimizer, epoch, loss_fn, scaler, losses, validation_accuracies, args):
     model.train()
     total_loss = 0
 
@@ -55,6 +56,34 @@ def train(model, device, train_loader, optimizer, epoch, loss_fn, scaler, losses
 
         if batch_idx % args.plot_loss_every_n_iteration == 0 and batch_idx != 0:
             plot_loss(losses, f"loss_epoch_{epoch}_idx_{batch_idx}", args)
+
+    validate(model, device, validation_accuracies, args)
+
+
+def validate(model, device, test_loader, epoch, loss_fn, accuracies, args):
+    model.eval()
+    test_loss = 0
+    correct = 0
+
+    progress_bar = tqdm(enumerate(test_loader), total=len(test_loader), desc=f"Epoch {epoch}, validation")
+
+    with torch.no_grad():
+        for batch_idx, (data, target) in progress_bar:
+            data, target = data.to(device), target.to(device)
+            output = model(data)
+
+            test_loss += loss_fn(output, target).item()
+            pred = output.argmax(dim=1, keepdim=False)
+            correct += (pred == target).sum().item()
+
+    test_loss /= len(test_loader.dataset)
+    print(
+        f"\nTest set: Average loss: {test_loss:.4f}, Accuracy: {correct}/{len(test_loader.dataset)} ({100. * correct / len(test_loader.dataset):.0f}%)\n"
+    )
+
+    accuracies.append(100.0 * correct / len(test_loader.dataset))
+
+    plot_accuracy(accuracies, f"accuracy_epoch_{epoch}", args)
 
 
 def test(model, device, test_loader, epoch, loss_fn, args):
@@ -112,11 +141,17 @@ def main(args):
     # Splitting the dataset into train and test sets
     train_size = int(0.8 * len(full_dataset))
     test_size = len(full_dataset) - train_size
-    train_dataset, test_dataset = random_split(full_dataset, [train_size, test_size])
+
+    train_dataset, validation_dataset, test_dataset = random_split(full_dataset, [train_size, test_size, test_size])
 
     train_loader = DataLoader(
         train_dataset, batch_size=args.batch_size, num_workers=args.num_workers, shuffle=True, pin_memory=True
     )
+
+    validation_dataset = DataLoader(
+        validation_dataset, batch_size=args.batch_size, num_workers=args.num_workers, shuffle=False, pin_memory=True
+    )
+
     test_loader = DataLoader(
         test_dataset, batch_size=args.batch_size, num_workers=args.num_workers, shuffle=False, pin_memory=True
     )
@@ -164,12 +199,18 @@ def main(args):
     # Test the model without any training.
     # test(model, device, test_loader, -1, loss_fn, args)
 
+    validation_accuracies = []
+
     for epoch in range(1, args.num_epochs + 1):
-        train(model, device, train_loader, optimizer, epoch, loss_fn, scaler, losses, args)
+        train(model, device, train_loader, optimizer, epoch, loss_fn, scaler, losses, validation_accuracies, args)
         test(model, device, test_loader, epoch, loss_fn, args)
 
         if args.save_checkpoints and epoch % args.save_checkpoints_epoch == 0:
-            torch.save(model.state_dict(), f"checkpoints/{args.run_name}/epoch_{epoch}.pth")
+
+            if len(validation_accuracies) > 0 and validation_accuracies[-1] >= max(validation_accuracies):
+                torch.save(model.state_dict(), f"checkpoints/{args.run_name}/best_model.pth")
+            else:
+                torch.save(model.state_dict(), f"checkpoints/{args.run_name}/epoch_{epoch}.pth")
 
     if args.save_checkpoints:
         torch.save(model.state_dict(), f"checkpoints/{args.run_name}/final.pth")
@@ -188,4 +229,5 @@ if __name__ == "__main__":
     os.makedirs(f"results/{args.run_name}/loss/", exist_ok=True)
     os.makedirs(f"results/{args.run_name}/conf/", exist_ok=True)
     os.makedirs(f"results/{args.run_name}/misclassified/", exist_ok=True)
+    os.makedirs(f"results/{args.run_name}/accuracy/", exist_ok=True)
     main(args)
