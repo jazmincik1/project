@@ -24,7 +24,8 @@ def import_images_data(samples_directory):
     return (np.array(image_pixels), np.array(image_labels))
 
 # Directory containing images
-path_to_sample_images = 'raw-img'
+#path_to_sample_images = 'raw-img'
+path_to_sample_images = '/content/drive/My Drive/colab_data/animals'
 samples_directory = list(paths.list_images(path_to_sample_images))
 image_pixels, image_labels = import_images_data(samples_directory)
 
