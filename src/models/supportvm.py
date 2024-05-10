@@ -24,7 +24,8 @@ def import_images_data(samples_directory):
     return (np.array(image_pixels), np.array(image_labels))
 
 # Directory containing image files
-path_to_sample_images = 'raw-img1'
+#path_to_sample_images = 'raw-img1'
+path_to_sample_images = '/content/drive/My Drive/colab_data/animals'
 
 param_grid = {
     'C': [0.01,0.1,1],  # Penalty parameter C
