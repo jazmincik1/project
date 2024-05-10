@@ -28,8 +28,8 @@ elif [ "$MODEL_NAME" == "resnet_fine_tune" ]; then
         --run-name "$MODEL_NAME-$MODEL_VERSION-run" \
         --dataset-dir /content/drive/MyDrive/colab_data/animals \
         --learning-rate 0.001 \
-        --batch-size 16 \
-        --num-workers 2 \
+        --batch-size 32 \
+        --num-workers 16 \
         --num-epochs 50 \
         --load-checkpoints 0 \
         --load-checkpoints-path /home \
