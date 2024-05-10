@@ -22,3 +22,7 @@ RESNET_VERSION = "18"
 # VGG specific
 VGG_VERSION = '16'
 DECAY_LR = None
+
+# Alexnet specific
+WEIGHT_DECAY = 0
+EARLY_STOP_PATIENCE = 5

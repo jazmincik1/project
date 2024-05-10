@@ -22,3 +22,7 @@ parser.add_argument("--resnet-version", type=str, default=config.RESNET_VERSION)
 #vgg
 parser.add_argument("--decay-lr", type=int, default=config.DECAY_LR)
 parser.add_argument("--vgg-version", type=str, default=config.VGG_VERSION)
+
+#alexnet
+parser.add_argument("--weight-decay", type=float, default=config.WEIGHT_DECAY)
+parser.add_argument("--early-stop-patience", type=int, default=config.EARLY_STOP_PATIENCE)

@@ -22,6 +22,17 @@ from torchvision.models import AlexNet_Weights
 from torch.cuda.amp import GradScaler
 from torch.utils.data import DataLoader, random_split
 
+def validate(model, device, validation_loader, loss_fn):
+    model.eval()
+    validation_loss = 0
+    with torch.no_grad():
+        for data, target in validation_loader:
+            data, target = data.to(device), target.to(device)
+            output = model(data)
+            loss = loss_fn(output, target)
+            validation_loss += loss.item()
+    return validation_loss / len(validation_loader)
+
 def train(model, device, train_loader, optimizer, epoch, loss_fn, scaler, losses, args):
 
     model.train()
@@ -89,10 +100,12 @@ def test(model, device, test_loader, epoch, loss_fn, args):
 def main(args):
 
     dataset = AnimalDataset(root_dir=args.dataset_dir, transform=get_transform(resize=256, crop=224))
-    train_size = int(0.8 * len(dataset))
-    test_size = len(dataset) - train_size
-    train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
+    train_size = int(0.7 * len(dataset))
+    validation_size = int(0.1 * len(dataset))
+    test_size = len(dataset) - train_size - validation_size
+    train_dataset, validation_dataset, test_dataset = random_split(dataset, [train_size, validation_size, test_size])
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, num_workers=args.num_workers, shuffle=True, pin_memory=True)
+    validation_loader = DataLoader(validation_dataset, batch_size=args.batch_size, num_workers=args.num_workers, shuffle=False, pin_memory=True)
     test_loader = DataLoader(test_dataset, batch_size=args.batch_size, num_workers=args.num_workers, shuffle=False, pin_memory=True)
     device = args.device
     model = models.alexnet(weights=AlexNet_Weights.IMAGENET1K_V1) #trying pretrained model
@@ -107,13 +120,39 @@ def main(args):
         param.requires_grad = True
 
     loss_fn = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=args.learning_rate)
+    optimizer = optim.Adam(model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.1, patience=10)
     scaler = GradScaler()
     losses = deque(maxlen=1000)
+
+    best_val_loss = float('inf')
+    epochs_no_improve = 0
+
     for epoch in range(1, args.num_epochs + 1):
+
+        '''train(model, device, train_loader, optimizer, epoch, loss_fn, scaler, losses, args)
+        test(model, device, test_loader, epoch, loss_fn, args)
+        if args.save_checkpoints and epoch % args.save_checkpoints_epoch == 0:
+            torch.save(model.state_dict(), f"checkpoints/{args.run_name}/epoch_{epoch}.pth")
+        validation_loss = validate(model, device, validation_loader, loss_fn)
+        scheduler.step(validation_loss)'''
 
         train(model, device, train_loader, optimizer, epoch, loss_fn, scaler, losses, args)
         test(model, device, test_loader, epoch, loss_fn, args)
+        validation_loss = validate(model, device, validation_loader, loss_fn)
+        scheduler.step(validation_loss)
+
+        if validation_loss < best_val_loss:
+            best_val_loss = validation_loss
+            epochs_no_improve = 0
+            torch.save(model.state_dict(), f"checkpoints/{args.run_name}/best_model.pth")
+        else:
+            epochs_no_improve += 1
+
+        if epochs_no_improve == args.early_stop_patience:
+            print(f'Early stopping triggered after {epoch} epochs.')
+            break
+
         if args.save_checkpoints and epoch % args.save_checkpoints_epoch == 0:
             torch.save(model.state_dict(), f"checkpoints/{args.run_name}/epoch_{epoch}.pth")
 
