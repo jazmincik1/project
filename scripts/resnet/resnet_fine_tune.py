@@ -139,8 +139,8 @@ def main(args):
     full_dataset = AnimalDataset(root_dir=args.dataset_dir, transform=get_transform(resize=256, crop=224))
 
     # Splitting the dataset into train and test sets
-    train_size = int(0.8 * len(full_dataset))
-    test_size = len(full_dataset) - train_size
+    test_size = int(0.2 * len(full_dataset))
+    train_size = len(full_dataset) - test_size * 2
 
     train_dataset, validation_dataset, test_dataset = random_split(full_dataset, [train_size, test_size, test_size])
 
