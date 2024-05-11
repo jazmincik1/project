@@ -214,7 +214,7 @@ def main(args):
 
     if args.save_checkpoints:
         torch.save(best_model.state_dict(), f"results/{args.run_name}/checkpoints/best.pth")
-        torch.save(model.state_dict(), f"checkpoints/{args.run_name}/final.pth")
+        torch.save(model.state_dict(), f"results/{args.run_name}/checkpoints/final.pth")
         
         
     test(best_model, device, test_loader, epoch, criterion, args)
