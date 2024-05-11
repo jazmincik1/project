@@ -149,8 +149,13 @@ def main(args):
     # Splitting the dataset into train and test sets
     train_size = int(0.8 * len(full_dataset))
     test_size = len(full_dataset) - train_size
+    
     train_dataset, test_dataset = random_split(full_dataset, [train_size, test_size])
-    train_dataset, validation_dataset = random_split(train_dataset, [train_size, test_size])
+    
+    validation_size = int(0.2 * train_size)
+    train_size = train_size - validation_size
+    
+    train_dataset, validation_dataset = random_split(train_dataset, [train_size, validation_size])
 
     train_loader = DataLoader(
         train_dataset, batch_size=args.batch_size, num_workers=args.num_workers, shuffle=True, pin_memory=True
