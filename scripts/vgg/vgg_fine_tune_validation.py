@@ -236,5 +236,6 @@ if __name__ == "__main__":
     os.makedirs(f"results/{args.run_name}/conf/", exist_ok=True)
     os.makedirs(f"results/{args.run_name}/misclassified/", exist_ok=True)
     os.makedirs(f"results/{args.run_name}/train",exist_ok=True)
+    os.makedirs(f"results/{args.run_name}/val",exist_ok=True)
     os.makedirs(f"results/{args.run_name}/checkpoints",exist_ok=True)
     main(args)
