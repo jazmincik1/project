@@ -209,9 +209,10 @@ def main(args):
 
     if args.save_checkpoints:
         torch.save(best_model.state_dict(), f"results/{args.run_name}/checkpoints/best.pth")
+        torch.save(model.state_dict(), f"checkpoints/{args.run_name}/final.pth")
         
-    model = best_model
-    test(model, device, test_loader, epoch, criterion, args)
+        
+    test(best_model, device, test_loader, epoch, criterion, args)
 
     plot_acc_x_loss(train_losses,train_acc,args)
     plot_acc_x_loss(val_losses,val_acc,args,args,val=True)
