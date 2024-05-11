@@ -39,9 +39,9 @@ def plot_acc_x_loss(train_losses, train_acc, args,val=False):
     ax2.plot(train_acc, color=color)
     ax2.tick_params(axis='y', labelcolor=color)
 
-    plt.title('Training Loss and Accuracy')
+    plt.title('Training Loss and Accuracy') if not val else plt.title('Validation Loss and Accuracy')
     fig.tight_layout() 
 
     # Save the plot
-    plt.savefig(f"{directory}/training_plot.png")
+    plt.savefig(f"{directory}/training_plot.png") if not val else plt.savefig(f"{directory}/validation_plot.png")
     plt.close()
