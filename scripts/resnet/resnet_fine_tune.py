@@ -225,7 +225,6 @@ if __name__ == "__main__":
     log("Using device:", args.device)
 
     log("Using args:", args)
-    os.makedirs(f"checkpoints/{args.run_name}", exist_ok=True)
     os.makedirs(f"results/{args.run_name}/loss/", exist_ok=True)
     os.makedirs(f"results/{args.run_name}/conf/", exist_ok=True)
     os.makedirs(f"results/{args.run_name}/misclassified/", exist_ok=True)

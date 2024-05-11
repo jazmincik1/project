@@ -22,7 +22,7 @@ def plot_loss(losses, file_name, args):
 def plot_acc_x_loss(train_losses, train_acc, args,val=False):
     directory = f"results/{args.run_name}/train" if not val else f"results/{args.run_name}/val"
     if not os.path.exists(directory):
-        os.makedirs(directory)
+        os.makedirs(directory,exist_ok=True)
 
     # Plotting
     fig, ax1 = plt.subplots()
