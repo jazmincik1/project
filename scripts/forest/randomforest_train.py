@@ -1,12 +1,13 @@
 import sys
 import os
-import numpy as np
-
-from dataset.dataset import AnimalDataset
-from models.vgg import VGG
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
+import numpy as np
+from src.dataset.dataset import AnimalDataset
+from src.models.vgg import VGG
+
 import torch
+from tqdm import tqdm
 from sklearn.model_selection import train_test_split
 
 from src.models.randomforest import RandomForestModel
@@ -64,26 +65,34 @@ def validate(model, X_val, y_val, n_est, args):
 def main(args):
     full_dataset = AnimalDataset(root_dir=args.dataset_dir, transform=get_transform(resize=256, crop=224))
 
-    model, num_features = VGG(version=64, num_classes=len(CLASS_NAMES)).get_feature_extractor()
+    model, num_features = VGG(version="16", num_classes=len(CLASS_NAMES)).get_feature_extractor()
 
     data_loader = DataLoader(
-        full_dataset, batch_size=1, num_workers=args.num_workers, shuffle=True, pin_memory=True
+        full_dataset, batch_size=64, num_workers=args.num_workers, shuffle=True, pin_memory=True
     )
     log("Loading dataset")
     
     
     model.eval()  # Set the model to evaluation mode
     device = args.device
+    model = model.to(device)
+
     feature_dataset  = []
     labels = []
-    
-    with torch.no_grad():
-        for inputs, labels in data_loader:
-            inputs, labels = inputs.to(device), labels.to(device)  # Move data to GPU
-            outputs = model(inputs)
-            outputs_np = outputs.detach().cpu().numpy()
-            feature_dataset.extend(outputs_np)
-            labels.extend(labels)
+
+    progress_bar = tqdm(enumerate(data_loader), total=len(data_loader), desc=f"Epoch")
+
+    for batch_idx, (data, target) in progress_bar:
+        inputs, label = data.to(device), target.to(device)  # Move data to GPU
+        outputs = model(inputs)
+        outputs_np = outputs.detach().cpu().numpy()
+
+        # If outputs are multidimensional, reshape or flatten them as needed
+        if outputs_np.ndim > 2:
+            outputs_np = outputs_np.reshape(outputs_np.shape[0], -1)  # Flattening each output to 1D per sample
+
+        feature_dataset.extend(outputs_np)
+        labels.extend(label.cpu().numpy().flatten())
             
     feature_dataset = np.array(feature_dataset)
     # Splitting the dataset into train and test sets
