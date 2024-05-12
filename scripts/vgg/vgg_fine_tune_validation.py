@@ -95,7 +95,7 @@ def validate_model(model, device, val_loader, epoch, criterion, args):
     return epoch_accuracy, epoch_loss
 
 
-def test(model, device, test_loader, criterion, args):
+def test(model, device, test_loader, epoch, loss_fn, args):
     model.eval()
     test_loss = 0
     correct = 0
@@ -104,14 +104,14 @@ def test(model, device, test_loader, criterion, args):
     all_labels = []
     misclassified_examples = []
 
-    progress_bar = tqdm(enumerate(test_loader), total=len(test_loader), desc=f"Test")
+    progress_bar = tqdm(enumerate(test_loader), total=len(test_loader), desc=f"Epoch {epoch}, test")
 
     with torch.no_grad():
         for batch_idx, (data, target) in progress_bar:
             data, target = data.to(device), target.to(device)
             output = model(data)
 
-            test_loss += criterion(output, target).item()
+            test_loss += loss_fn(output, target).item()
             pred = output.argmax(dim=1, keepdim=False)
             correct += (pred == target).sum().item()
 
@@ -124,7 +124,7 @@ def test(model, device, test_loader, criterion, args):
             misclassified_targets = target[misclassified_indices]
             misclassified_preds = pred[misclassified_indices]
 
-            for i in range(max(misclassified_data.size(0),100)):
+            for i in range(misclassified_data.size(0)):
                 example = {
                     "data": misclassified_data[i],
                     "true_label": CLASS_NAMES[misclassified_targets[i].item()],
@@ -132,8 +132,6 @@ def test(model, device, test_loader, criterion, args):
                 }
                 misclassified_examples.append(example)
 
-    plot_confusion_matrix(all_labels.numpy(), all_preds.numpy(), f"confusion_matrix_epoch", args)
-    save_misclassified_images(misclassified_examples, f"results/{args.run_name}/misclassified/")
     test_loss /= len(test_loader.dataset)
     print(
         f"\nTest set: Average loss: {test_loss:.4f}, Accuracy: {correct}/{len(test_loader.dataset)} ({100. * correct / len(test_loader.dataset):.0f}%)\n"
@@ -141,6 +139,9 @@ def test(model, device, test_loader, criterion, args):
 
     all_preds = torch.cat(all_preds).cpu()
     all_labels = torch.cat(all_labels).cpu()
+
+    plot_confusion_matrix(all_labels.numpy(), all_preds.numpy(), f"confusion_matrix_epoch_{epoch}", args)
+    save_misclassified_images(misclassified_examples, f"results/{args.run_name}/misclassified/{epoch}/")
 
 
 def main(args):
@@ -220,7 +221,7 @@ def main(args):
     test(best_model, device, test_loader, epoch, criterion, args)
 
     plot_acc_x_loss(train_losses,train_acc,args)
-    plot_acc_x_loss(val_losses,val_acc,args,args,val=True)
+    plot_acc_x_loss(val_losses,val_acc,args,val=True)
       
 
 if __name__ == "__main__":
